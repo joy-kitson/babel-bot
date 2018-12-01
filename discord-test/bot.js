@@ -21,6 +21,7 @@ bot.on('ready', function (evt) {
     logger.info(bot.username + ' - (' + bot.id + ')');
 });
 
+//sends a simple message to the specified user
 bot.ping = function(userID) {
     logger.info('sending message to user with id ' + userID);
     bot.sendMessage({
@@ -29,9 +30,11 @@ bot.ping = function(userID) {
     });
 }
 
+//pings every registered user
 bot.ping_all = function() {
     for (var key in users) {
         var user = users[key];
+        logger.info(key + '[' + typeof key + '] maps to ' + user);
         bot.ping(user.id);
     }
 };
@@ -44,16 +47,22 @@ var User = function(username, id) {
 };
 
 //tells the bot to intialise a record on this user
-users = {};
+bot.users = {};
 bot.register = function(username, id) {
     userObj = new User(username, id);
     logger.info(userObj)
-    users[id] = userObj;
+    bot.users[id] = userObj;
 };
 
-
+//adds a language to the set of those known by the specified user
 bot.add_lang = function(userID, lang) {
-    bot[userID].langs.add(lang);
+    user = bot.users[userID];
+    logger.info(user.username + ' now speaks ' + lang);
+    user.langs.add(lang);
+}
+
+bot.say = function(userID, msg) {
+
 }
 
 bot.on('message', function (user, userID, channelID, message, evt) {
@@ -62,7 +71,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
     if (message.substring(0, 1) == '!') {
         var args = message.substring(1).split(' ');
         var cmd = args[0];
-       
+
         args = args.splice(1);
         switch(cmd) {
             // !ping
@@ -82,10 +91,15 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             case 'pingall':
                 bot.ping_all();
                 break;
+
+            case 'addlang':
+                for (var i in args) {
+                    bot.add_lang(userID, args[i]);
+                }
             
             case 'say':
             case '':
-                bot.translate(userID, message);
+                bot.say(userID, message);
                 break;
             // Just add any case commands if you want to..
          }
