@@ -1,3 +1,7 @@
+.PHONY:run
+run: bot.js
+	node bot.js
+
 .PHONY:setup
 setup:
 	sudo npm install discord.io winston --save
