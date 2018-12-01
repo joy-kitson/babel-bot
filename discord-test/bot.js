@@ -126,15 +126,23 @@ bot.say = function(userID, msg) {
                 this.sendMessage({
                     to: recip_id,
                     message: sender.username + ': ' 
-                             + this.babel(msg, lang)
+                             + this.babelify(lang, msg)
                 });
             }
         }
     }
 }
 
-bot.babel = function(msg, lang) {
-    return '~~' + msg + '~~';
+bot.babelify = function(lang, msg) {
+    words = msg.split(' ');
+    words.map(this.babelify_word.bind(lang));
+    
+    return words.join(' ');
+}
+
+bot.babelify_word = function(lang, word) {
+    
+    return word.toUpperCase();
 }
 
 bot.on('message', function (user, userID, channelID, message, evt) {
