@@ -47,6 +47,9 @@ var User = function(username, id) {
     this.langs = new Set();
 };
 
+//NOTE: looks like the bot has all this info by default
+//      and my terminology just happened to match up
+//      with theirs, so... this is propably unneccesary
 //tells the bot to intialise a record on this user
 bot.register = function(username, id) {
     if (this.users[id] === undefined) {
@@ -65,6 +68,12 @@ bot.register = function(username, id) {
 bot.add_lang = function(userID, lang) {
     user = this.users[userID];
     logger.info(user.username + ' now speaks ' + lang);
+    
+    //intialise the user's set of languages if it doesn't exist yet
+    if (user.langs === undefined) {
+        user.langs = new Set();
+    }
+
     user.langs.add(lang);
 }
 
@@ -97,7 +106,9 @@ bot.on('message', function (user, userID, channelID, message, evt) {
             case 'lang':
                 switch(args[0]) {
                     case 'add':
-                        for (var i in args.splice(1)) {
+                        //take add out of the set of args
+                        args = args.splice(1);
+                        for (var i in args) {
                             bot.add_lang(userID, args[i]);
                         }
                         break;
