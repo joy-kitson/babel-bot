@@ -21,21 +21,26 @@ bot.on('ready', function (evt) {
     logger.info(bot.username + ' - (' + bot.id + ')');
 });
 
-var User = function(userID){
-    this.userID = userID;
-
-    return this;
+var User = function(username, id) {
+    this.username = username;
+    this.id = id;
 };
 
 users = [];
-bot.register = function(userID) {
-    users.push(new User(userID))
+bot.register = function(username, id) {
+    userObj = new User(username, id);
+    logger.info(userObj)
+    users.push(userObj);
 };
 
 bot.ping_all = function() {
-    for (var user in users) {
+    for (var i in users) {
+        var user = users[i];
+        logger.info(user);
+        logger.info('sending message to user ' + user.username
+                    + ' with id ' + user.id);
         bot.sendMessage({
-            to: user.userID,
+            to: user.id,
             message: 'Pong!'
         }); 
     }
@@ -64,7 +69,12 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 });
                 //}
             case 'register':
-                bot.register(userID)
+                logger.info('registering user ' + user 
+                            + ' [' + typeof user + ']');
+                logger.info(user + ' has id ' + userID 
+                            + ' [' + typeof userID + ']');
+                logger.info(user);
+                bot.register(user, userID);
 						break;
 
             case 'ping-all':
