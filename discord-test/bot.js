@@ -14,6 +14,7 @@ var bot = new Discord.Client({
    token: auth.token,
    autorun: true
 });
+bot.users = {};
 
 bot.on('ready', function (evt) {
     logger.info('Connected');
@@ -24,7 +25,7 @@ bot.on('ready', function (evt) {
 //sends a simple message to the specified user
 bot.ping = function(userID) {
     logger.info('sending message to user with id ' + userID);
-    bot.sendMessage({
+    this.sendMessage({
         to: userID,
         message: 'Pong!'
     });
@@ -32,10 +33,10 @@ bot.ping = function(userID) {
 
 //pings every registered user
 bot.ping_all = function() {
-    for (var key in users) {
-        var user = users[key];
-        logger.info(key + '[' + typeof key + '] maps to ' + user);
-        bot.ping(user.id);
+    for (var key in this.users) {
+        var user = this.users[key];
+        logger.info(key + ' maps to ' + user.username);
+        this.ping(user.id);
     }
 };
 
@@ -47,16 +48,22 @@ var User = function(username, id) {
 };
 
 //tells the bot to intialise a record on this user
-bot.users = {};
 bot.register = function(username, id) {
-    userObj = new User(username, id);
-    logger.info(userObj)
-    bot.users[id] = userObj;
+    if (this.users[id] === undefined) {
+        logger.info('registering user ' + username 
+                    + ' with id ' + id); 
+        userObj = new User(username, id);
+        logger.info(userObj)
+        this.users[id] = userObj;
+    } else {
+        user = this.users[id];
+        logger.info('user ' + user.username + ' already registered');
+    }
 };
 
 //adds a language to the set of those known by the specified user
 bot.add_lang = function(userID, lang) {
-    user = bot.users[userID];
+    user = this.users[userID];
     logger.info(user.username + ' now speaks ' + lang);
     user.langs.add(lang);
 }
@@ -76,26 +83,26 @@ bot.on('message', function (user, userID, channelID, message, evt) {
         switch(cmd) {
             // !ping
             case 'ping':
-                bot.ping(userID);
+                if (args[0] == 'all') {
+                    bot.ping_all();
+                } else {
+                    bot.ping(userID);
+                }
                 break;
             
             case 'register':
-                logger.info('registering user ' + user 
-                            + ' [' + typeof user + ']');
-                logger.info(user + ' has id ' + userID 
-                            + ' [' + typeof userID + ']');
-                logger.info(user);
                 bot.register(user, userID);
 						break;
 
-            case 'pingall':
-                bot.ping_all();
-                break;
-
-            case 'addlang':
-                for (var i in args) {
-                    bot.add_lang(userID, args[i]);
+            case 'lang':
+                switch(args[0]) {
+                    case 'add':
+                        for (var i in args.splice(1)) {
+                            bot.add_lang(userID, args[i]);
+                        }
+                        break;
                 }
+                break;
             
             case 'say':
             case '':
