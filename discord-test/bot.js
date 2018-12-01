@@ -21,21 +21,23 @@ bot.on('ready', function (evt) {
     logger.info(bot.username + ' - (' + bot.id + ')');
 });
 
+//constructor for user objects
 var User = function(username, id) {
     this.username = username;
     this.id = id;
+    this.langs = new Set();
 };
 
-users = [];
+users = {};
 bot.register = function(username, id) {
     userObj = new User(username, id);
     logger.info(userObj)
-    users.push(userObj);
+    users[id] = userObj;
 };
 
 bot.ping_all = function() {
-    for (var i in users) {
-        var user = users[i];
+    for (var key in users) {
+        var user = users[key];
         logger.info(user);
         logger.info('sending message to user ' + user.username
                     + ' with id ' + user.id);
@@ -62,12 +64,12 @@ bot.on('message', function (user, userID, channelID, message, evt) {
         switch(cmd) {
             // !ping
             case 'ping':
-                //for(i=0;i<100;i++){
                 bot.sendMessage({
                     to: userID,
                     message: 'Pong!'
                 });
-                //}
+                break;
+            
             case 'register':
                 logger.info('registering user ' + user 
                             + ' [' + typeof user + ']');
@@ -77,8 +79,14 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                 bot.register(user, userID);
 						break;
 
-            case 'ping-all':
+            case 'pingall':
                 bot.ping_all();
+                break;
+            
+            case 'say':
+            case '':
+                bot.translate(userID, message);
+                break;
             // Just add any case commands if you want to..
          }
      }
