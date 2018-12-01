@@ -21,6 +21,21 @@ bot.on('ready', function (evt) {
     logger.info(bot.username + ' - (' + bot.id + ')');
 });
 
+bot.ping = function(userID) {
+    logger.info('sending message to user with id ' + userID);
+    bot.sendMessage({
+        to: userID,
+        message: 'Pong!'
+    });
+}
+
+bot.ping_all = function() {
+    for (var key in users) {
+        var user = users[key];
+        bot.ping(user.id);
+    }
+};
+
 //constructor for user objects
 var User = function(username, id) {
     this.username = username;
@@ -28,6 +43,7 @@ var User = function(username, id) {
     this.langs = new Set();
 };
 
+//tells the bot to intialise a record on this user
 users = {};
 bot.register = function(username, id) {
     userObj = new User(username, id);
@@ -35,23 +51,10 @@ bot.register = function(username, id) {
     users[id] = userObj;
 };
 
-bot.ping_all = function() {
-    for (var key in users) {
-        var user = users[key];
-        logger.info(user);
-        logger.info('sending message to user ' + user.username
-                    + ' with id ' + user.id);
-        bot.sendMessage({
-            to: user.id,
-            message: 'Pong!'
-        }); 
-    }
-};
 
-//filters messages based on languages
-bot.filter = function(msg, lang) {
-  
-};
+bot.add_lang = function(userID, lang) {
+    bot[userID].langs.add(lang);
+}
 
 bot.on('message', function (user, userID, channelID, message, evt) {
     // Our bot needs to know if it will execute a command
@@ -64,10 +67,7 @@ bot.on('message', function (user, userID, channelID, message, evt) {
         switch(cmd) {
             // !ping
             case 'ping':
-                bot.sendMessage({
-                    to: userID,
-                    message: 'Pong!'
-                });
+                bot.ping(userID);
                 break;
             
             case 'register':
