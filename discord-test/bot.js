@@ -68,8 +68,16 @@ bot.add_lang = function(userID, lang) {
     user.langs.add(lang);
 }
 
-bot.say = function(userID, msg) {
+//sets the users current language
+bot.set_lang = function(userID, lang) {
+    user = this.users[userID];
+    logger.info(user.username + ' default language set to ' + lang);
 
+    
+}
+
+bot.say = function(userID, msg) {
+    
 }
 
 bot.on('message', function (user, userID, channelID, message, evt) {
