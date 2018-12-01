@@ -134,23 +134,38 @@ bot.say = function(userID, msg) {
 };
 
 bot.gen_rand_word = function(word) {
-    logger.info(word);
+    //logger.info(word);
 
     len = word.length + 2;
+    //logger.info(len);
     word = '';
 
     while (word === '') {
-        //make a random number in [0,1)...
-        word = Math.random();
-        //...convert to base 36 (which runs 0-z)...
-        word = word.toString(36)
-        //...then take off the decimal point...
-        word = word.substring(2);
+        subwords = [];
+        for (var i = 0; i < len;){
+            //make a random number in [0,1)...
+            subword = Math.random();
+            //...convert to base 36 (which runs 0-z)...
+            subword = subword.toString(36)
+            //...then take off the decimal point...
+            subword = subword.substring(2);
+            
+            subwords.push(subword);
+            
+            //...and increment i to account for the subword we made
+            i += subword.length; 
+        }
+        //merge the subwords into a single word...
+        word = subwords.join('');
+
+        //...trim down to the given length...
+        word = word.substring(word.length - len);
+        
         //...and filter out any numeric characters 
         word = word.replace(/[0-9]/g,'');
+        //logger.info(word);
     }
 
-    logger.info(word);
     return word;
 };
 
