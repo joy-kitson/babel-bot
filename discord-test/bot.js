@@ -125,11 +125,16 @@ bot.say = function(userID, msg) {
             } else {
                 this.sendMessage({
                     to: recip_id,
-                    message: sender.username + ': ~~' + msg + '~~'
+                    message: sender.username + ': ' 
+                             + this.babel(msg, lang)
                 });
             }
         }
     }
+}
+
+bot.babel = function(msg, lang) {
+    return '~~' + msg + '~~';
 }
 
 bot.on('message', function (user, userID, channelID, message, evt) {
