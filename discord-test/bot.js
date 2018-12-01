@@ -75,7 +75,7 @@ bot.add_lang = function(userID, lang) {
     }
 
     user.langs.add(lang.toLowerCase());
-}
+};
 
 //sets the user's current language
 bot.set_lang = function(userID, lang) {
@@ -83,7 +83,7 @@ bot.set_lang = function(userID, lang) {
     user = this.users[userID];
     logger.info(user.username + ' default language set to ' + lang);
     user.cur_lang = lang    
-}
+};
 
 //lists the user's current set of languages
 bot.list_langs = function(userID, lang) {
@@ -101,7 +101,7 @@ bot.list_langs = function(userID, lang) {
                      + Array.from(user.langs).join(', ')
         });
     }
-}
+};
 
 bot.say = function(userID, msg) {
     sender = this.users[userID];
@@ -131,19 +131,51 @@ bot.say = function(userID, msg) {
             }
         }
     }
-}
+};
+
+bot.gen_rand_word = function(word) {
+    logger.info(word);
+
+    len = word.length + 2;
+    word = '';
+
+    while (word === '') {
+        //make a random number in [0,1)...
+        word = Math.random();
+        //...convert to base 36 (which runs 0-z)...
+        word = word.toString(36)
+        //...then take off the decimal point...
+        word = word.substring(2);
+        //...and filter out any numeric characters 
+        word = word.replace(/[0-9]/g,'');
+    }
+
+    logger.info(word);
+    return word;
+};
 
 bot.babelify = function(lang, msg) {
     words = msg.split(' ');
-    words.map(this.babelify_word.bind(lang));
-    
+    words = words.map(w => this.babelify_word(lang, w));
     return words.join(' ');
-}
+};
 
 bot.babelify_word = function(lang, word) {
+    word = word.toLowerCase();
+    if (this.babelifications === undefined) {
+        this.babelifications = {};
+    }
+
+    if (this.babelifications[lang] === undefined) {
+        this.babelifications[lang] = {};
+    }
     
-    return word.toUpperCase();
-}
+    if (this.babelifications[lang][word] === undefined) {
+        this.babelifications[lang][word] = this.gen_rand_word(word);
+    }
+
+    return this.babelifications[lang][word];
+};
 
 bot.on('message', function (user, userID, channelID, message, evt) {
     // Our bot needs to know if it will execute a command
