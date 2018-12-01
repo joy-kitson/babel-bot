@@ -1,0 +1,4 @@
+
+discord-test/node_modules/*
+discord-test/npm-debug.log
+discord-test/package-lock.json
