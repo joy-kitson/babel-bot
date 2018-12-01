@@ -1,22 +1,51 @@
 var Discord = require('discord.io');
 var logger = require('winston');
 var auth = require('./auth.json');
+
 // Configure logger settings
 logger.remove(logger.transports.Console);
 logger.add(new logger.transports.Console, {
     colorize: true
 });
 logger.level = 'debug';
+
 // Initialize Discord Bot
 var bot = new Discord.Client({
    token: auth.token,
    autorun: true
 });
+
 bot.on('ready', function (evt) {
     logger.info('Connected');
     logger.info('Logged in as: ');
     logger.info(bot.username + ' - (' + bot.id + ')');
 });
+
+var User = function(userID){
+    this.userID = userID;
+
+    return this;
+};
+
+users = [];
+bot.register = function(userID) {
+    users.push(new User(userID))
+};
+
+bot.ping_all = function() {
+    for (var user in users) {
+        bot.sendMessage({
+            to: user.userID,
+            message: 'Pong!'
+        }); 
+    }
+};
+
+//filters messages based on languages
+bot.filter = function(msg, lang) {
+  
+};
+
 bot.on('message', function (user, userID, channelID, message, evt) {
     // Our bot needs to know if it will execute a command
     // It will listen for messages that will start with `!`
@@ -34,7 +63,12 @@ bot.on('message', function (user, userID, channelID, message, evt) {
                     message: 'Pong!'
                 });
                 //}
-            break;
+            case 'register':
+                bot.register(userID)
+						break;
+
+            case 'ping-all':
+                bot.ping_all();
             // Just add any case commands if you want to..
          }
      }
